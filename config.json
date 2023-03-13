@@ -1,9 +1,11 @@
 {
-    "Fracture" : "Breach",
+    "Fracture" : "Omen",
     "Ascent" : "Omen",
     "Split" : "Omen",
     "Bind" : "Omen",
-    "Breeze" : "Breach" ,
+    "Breeze" : "Omen" ,
     "Icebox" : "Omen",
-    "Haven" : "Omen"
+    "Haven" : "Omen",
+    "Pearl" : "Omen",
+    "Lotus" : "Omen"
 }
