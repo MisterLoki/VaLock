@@ -7,6 +7,10 @@ import { invoke } from "@tauri-apps/api/tauri";
 const Home = (props) => {
   const navigate = useNavigate();
 
+  const start = () => {
+    alert("In this version can not start via gui but u can use start.bat like old way :)")
+  };
+
   return (
     <Flex height="100vh" align="center" justify="center">
       <Stack spacing={5} direction="column">
@@ -26,7 +30,7 @@ const Home = (props) => {
         </Button>
         <Button
           onClick={() => {
-            invoke("start");
+            start();
           }}
         >
           Start
