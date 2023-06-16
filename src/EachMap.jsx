@@ -108,7 +108,7 @@ function EachMap() {
         p="4"
         bgImage={selectedMap != null ? selectedMap.full_portrait : ""}
         filter="drop-shadow(0 0 10px rgba(0, 0, 0, 1))"
-        bgSize="auto"
+        bgSize="100% 100%"
         bgPosition="cover"
         bgRepeat="no-repeat"
         style={{
