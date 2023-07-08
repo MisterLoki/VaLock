@@ -1,6 +1,6 @@
 import React, { useEffect, useState, Fragment } from "react";
 import AgentBox from "./components/AgentsBox";
-import { Button, Center, Box, Flex, Spacer, Select } from "@chakra-ui/react";
+import { Button, Center, Box, Flex, Select } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { invoke } from "@tauri-apps/api/tauri";
 

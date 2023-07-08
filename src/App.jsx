@@ -2,6 +2,7 @@ import { Route, Routes, BrowserRouter } from "react-router-dom";
 import AllMap from "./AllMap";
 import EachMap from "./EachMap";
 import Home from "./Home";
+import Profile from "./Profile";
 
 function App() {
   return (
@@ -23,6 +24,12 @@ function App() {
           path="/each_map"
           element={
             <EachMap/>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <Profile/>
           }
         />
       </Routes>

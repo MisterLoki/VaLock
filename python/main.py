@@ -14,8 +14,13 @@ import sys
 
 exe_dir = os.getenv('APPDATA')
 
-data_file_path = os.path.join(exe_dir, "VaLock", "config.json")
+valock_path = os.path.join(exe_dir, "VaLock", "active")
+profile = "default"
+if os.path.exists(valock_path):
+    with open(valock_path, encoding="utf8") as f:
+        profile = f.readline()
 
+data_file_path = os.path.join(exe_dir, "VaLock", "profiles", profile)
 
 
 link = "https://glz-eu-1.eu.a.pvp.net"

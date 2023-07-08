@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::fs::{self, File, OpenOptions};
 use std::io::{Read, Seek, SeekFrom, Write};
@@ -9,13 +10,39 @@ use std::path::PathBuf;
 mod api;
 mod errors;
 
-fn get_config_dir() -> PathBuf {
+fn get_data_dir() -> PathBuf {
     let mut dir: PathBuf = tauri::api::path::data_dir().unwrap();
     dir.push("VaLock");
     if !dir.exists() {
         let _ = fs::create_dir_all(&dir);
     }
-    dir.push("config.json");
+    dir
+}
+
+fn get_active_profile_dir() -> PathBuf {
+    let mut dir: PathBuf = get_data_dir();
+    dir.push("active");
+    dir
+}
+
+fn get_profiles_dir() -> PathBuf {
+    let mut dir: PathBuf = get_data_dir();
+    dir.push("profiles");
+    dir
+}
+
+#[tauri::command]
+fn get_active_profile() -> String {
+    let dir: PathBuf = get_active_profile_dir();
+    if dir.exists() {
+        return fs::read_to_string(dir).expect("default");
+    }
+    "default".to_string()
+}
+
+fn get_config_dir() -> PathBuf {
+    let mut dir: PathBuf = get_profiles_dir();
+    dir.push(get_active_profile());
     dir
 }
 
@@ -73,13 +100,69 @@ fn set_agent_for_map(agent: String, map: String) -> Result<(), errors::MyErr> {
     Ok(())
 }
 
-#[tauri::command]
-fn start() {
-    
+#[derive(Debug, Serialize, Deserialize)]
+struct Profile {
+    name: String,
+    full_portrait: String,
 }
+
+#[tauri::command]
+fn add_profile(name: String) -> Result<(), errors::MyErr> {
+    let mut dir = get_profiles_dir();
+    dir.push(name);
+    if dir.exists() {
+        return Err(errors::MyErr::DuplicateErr());
+    }
+    let mut file = File::create(dir)?;
+    file.write_all(json!({}).to_string().as_bytes())?;
+    Ok(())
+}
+
+#[tauri::command]
+fn delete_profile(name: String) -> Result<(), errors::MyErr> {
+    let mut dir = get_profiles_dir();
+    dir.push(&name);
+    println!("{:?}", &dir);
+    println!("{:?}", &name);
+    fs::remove_file(dir)?;
+    Ok(())
+}
+
+#[tauri::command]
+fn get_profiles() -> Result<Vec<String>, errors::MyErr> {
+    let dir = get_profiles_dir();
+    let entries = fs::read_dir(dir)?;
+    let profiles: Vec<String> = entries
+        .filter_map(|entry| {
+            if let Ok(entry) = entry {
+                entry.file_name().to_str().map(String::from)
+            } else {
+                None
+            }
+        })
+        .collect();
+    Ok(profiles)
+}
+
+#[tauri::command]
+fn set_active_profile(name: String) -> Result<(), errors::MyErr> {
+    let dir = get_active_profile_dir();
+    let mut data = File::create(dir)?;
+    data.write_all(name.as_bytes())?;
+    Ok(())
+}
+
+#[tauri::command]
+fn start() {}
 
 fn main() {
     if !get_config_dir().exists() {
+        match fs::create_dir_all(get_profiles_dir()) {
+            Ok(_) => {}
+            Err(_) => {
+                return;
+            }
+        }
         match File::create(get_config_dir()) {
             Ok(mut file) => match file.write_all(json!({}).to_string().as_bytes()) {
                 Ok(_) => {}
@@ -99,6 +182,11 @@ fn main() {
             get_config,
             set_agent_for_all_maps,
             set_agent_for_map,
+            add_profile,
+            set_active_profile,
+            get_profiles,
+            get_active_profile,
+            delete_profile,
             start
         ])
         .run(tauri::generate_context!())
