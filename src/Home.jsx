@@ -1,6 +1,6 @@
-import React, { useEffect , useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Select, Flex, Stack } from "@chakra-ui/react";
+import { Button, Select, Flex, Stack, Spinner } from "@chakra-ui/react";
 import { invoke } from "@tauri-apps/api/tauri";
 
 const Home = (props) => {
@@ -35,17 +35,30 @@ const Home = (props) => {
 
   const [profiles, setProfiles] = useState([]);
   const [activeProfile, setActiveProfile] = useState(0);
+  const [isInstalling, setIsInstalling] = useState(false);
 
-  const start = () => {
-    alert(
-      "In this version can not start via gui but u can use start.bat like old way :)"
-    );
+  const installDependencies = () => {
+    setIsInstalling(true);
+    invoke("install_dependenies")
+      .then(() => {
+        setIsInstalling(false);
+      })
+      .catch((error) => {
+        setIsInstalling(false);
+        alert(error);
+      });
   };
 
   const onProfileSelect = (event) => {
-    setActiveProfile(event.target.value)
-    invoke("set_active_profile", {name: profiles[event.target.value]}).then().catch((error) => {alert(error);});
+    setActiveProfile(event.target.value);
+    invoke("set_active_profile", { name: profiles[event.target.value] })
+      .then()
+      .catch((error) => {
+        alert(error);
+      });
   };
+
+  const onStart = () => {};
 
   return (
     <Flex height="100vh" align="center" justify="center">
@@ -57,7 +70,9 @@ const Home = (props) => {
           value={activeProfile}
         >
           {profiles.map((profile, index) => (
-            <option value={index} key={index}>{profile}</option>
+            <option value={index} key={index}>
+              {profile}
+            </option>
           ))}
         </Select>
         <Button
@@ -83,8 +98,22 @@ const Home = (props) => {
         </Button>
         <Button
           onClick={() => {
-            start();
+            installDependencies();
           }}
+          isLoading={isInstalling}
+          loadingText="Installing"
+        >
+          {isInstalling ? (
+            <Spinner color="white" size="sm" />
+          ) : (
+            "Install Dependencies"
+          )}
+        </Button>
+        <Button
+          onClick={() => {
+            onStart();
+          }}
+          isDisabled={isInstalling}
         >
           Start
         </Button>

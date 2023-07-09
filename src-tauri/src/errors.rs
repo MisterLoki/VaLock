@@ -8,7 +8,8 @@ pub enum MyErr {
     ReqwestErr(reqwest::Error),
     SerdeErr(serde_json::Error),
     IOErr(io::Error),
-    DuplicateErr()
+    DuplicateErr(),
+    CustomError(String)
 }
 
 impl From<reqwest::Error> for MyErr {
@@ -36,6 +37,7 @@ impl std::fmt::Display for MyErr {
             MyErr::ReqwestErr(err) => write!(f, "{}", err),
             MyErr::IOErr(err) => write!(f, "{}", err),
             MyErr::DuplicateErr() => write!(f, "Already Exist."),
+            MyErr::CustomError(err) => write!(f, "{}", err),
         }
     }
 }

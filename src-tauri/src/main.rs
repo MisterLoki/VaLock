@@ -7,6 +7,9 @@ use std::fs::{self, File, OpenOptions};
 use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::PathBuf;
 
+use tokio::task;
+use std::process::Command;
+
 mod api;
 mod errors;
 
@@ -153,7 +156,45 @@ fn set_active_profile(name: String) -> Result<(), errors::MyErr> {
 }
 
 #[tauri::command]
-fn start() {}
+fn start() {
+    // let mut start_path = get_data_dir();
+    // start_path.push("main.py");
+
+    // let output  = Command::new("python").arg(start_path).spawn()
+    // .expect("Failed to open the application");
+
+    // println!("Res: {:?}", output);
+}
+
+#[tauri::command]
+async fn install_dependenies() -> Result<(), errors::MyErr> {
+
+    let result = task::spawn_blocking(|| api::prepare_python_code(get_data_dir())).await;
+    match result {
+        Ok(_) => {}
+        Err(error) => {
+            return Err(errors::MyErr::CustomError(error.to_string()));
+        }
+    }
+
+    let result = task::spawn_blocking(|| api::prepare_start_bat(get_data_dir())).await;
+    match result {
+        Ok(_) => {}
+        Err(error) => {
+            return Err(errors::MyErr::CustomError(error.to_string()));
+        }
+    }
+
+    let result = task::spawn_blocking(|| api::download_python(get_data_dir())).await;
+    match result {
+        Ok(_) => {}
+        Err(error) => {
+            return Err(errors::MyErr::CustomError(error.to_string()));
+        }
+    }
+    
+    Ok(())
+}
 
 fn main() {
     if !get_config_dir().exists() {
@@ -187,6 +228,7 @@ fn main() {
             get_profiles,
             get_active_profile,
             delete_profile,
+            install_dependenies,
             start
         ])
         .run(tauri::generate_context!())
