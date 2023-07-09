@@ -10,7 +10,7 @@ import json
 import urllib3
 urllib3.disable_warnings()
 import os
-import sys
+
 
 exe_dir = os.getenv('APPDATA')
 

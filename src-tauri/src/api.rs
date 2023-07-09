@@ -1,6 +1,11 @@
+use std::io::Write;
+use std::path::PathBuf;
+use std::fs::{self, File};
 use reqwest::{self};
 use serde::{Deserialize, Serialize};
 use serde_json::{self, Value};
+
+use unzip;
 
 use crate::errors;
 
@@ -73,4 +78,55 @@ pub fn get_maps() -> Result<Vec<Map>, errors::MyErr> {
     result.dedup_by_key(|a| a.name.clone());
 
     Ok(result)
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Version {
+    pub version: i32,
+    pub update_message: String,
+}
+
+pub struct VersionCheckResult {
+    pub need_update: bool,
+    pub update_message: String
+}
+
+fn get_version() -> i32 {
+    return 1;
+}
+
+pub fn need_version_update() -> Result<VersionCheckResult, errors::MyErr> {    
+    let resp: Version = reqwest::blocking::get("https://raw.githubusercontent.com/mahdigholami099/VaLock/main/version")?.json::<Version>()?;
+
+    if resp.version == get_version() {
+        return Ok(VersionCheckResult {need_update: false, update_message: "".to_string()});
+    }
+    else {
+        return Ok(VersionCheckResult {need_update: true, update_message: resp.update_message});
+    }
+}
+
+pub fn prepare_python_code(mut path_to_save: PathBuf) -> Result<(), errors::MyErr> {
+    path_to_save.push("main.py");
+    let mut file: File = File::create(path_to_save)?;
+    file.write_all(&reqwest::blocking::get(format!("https://raw.githubusercontent.com/mahdigholami099/VaLock/main/python/{}/main.py", get_version()))?.bytes()?)?;
+    Ok(())
+}
+
+pub fn prepare_start_bat(mut path_to_save: PathBuf) -> Result<(), errors::MyErr> {
+    path_to_save.push("start.bat");
+    let mut file: File = File::create(path_to_save)?;
+    file.write_all(&reqwest::blocking::get(format!("https://raw.githubusercontent.com/mahdigholami099/VaLock/main/python/{}/start.bat", get_version()))?.bytes()?)?;
+    Ok(())
+}
+
+pub fn download_python(path_to_save: PathBuf) -> Result<(), errors::MyErr> {
+    let archive = path_to_save.clone().join("py.zip");
+    let mut file: File = File::create(&archive)?;
+    file.write_all(&reqwest::blocking::get(format!("https://github.com/mahdigholami099/VaLock/raw/main/python/{}/py.zip", get_version()))?.bytes()?)?;
+
+    unzip::Unzipper::new(File::open(&archive)?, path_to_save).unzip()?;
+
+    fs::remove_file(archive)?;
+    Ok(())
 }
