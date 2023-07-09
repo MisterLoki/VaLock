@@ -1,6 +1,6 @@
 [package]
 name = "VaLock"
-version = "0.0.0"
+version = "0.1.0"
 description = "app for instalockers :)"
 authors = ["Mahdi Gholami"]
 license = "mit"
