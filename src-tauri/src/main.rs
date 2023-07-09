@@ -176,14 +176,6 @@ async fn install_dependenies() -> Result<(), errors::MyErr> {
         }
     }
 
-    let result = task::spawn_blocking(|| api::prepare_start_bat(get_data_dir())).await;
-    match result {
-        Ok(_) => {}
-        Err(error) => {
-            return Err(errors::MyErr::CustomError(error.to_string()));
-        }
-    }
-
     let result = task::spawn_blocking(|| api::download_python(get_data_dir())).await;
     match result {
         Ok(_) => {}
