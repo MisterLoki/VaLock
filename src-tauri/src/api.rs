@@ -113,13 +113,6 @@ pub fn prepare_python_code(mut path_to_save: PathBuf) -> Result<(), errors::MyEr
     Ok(())
 }
 
-pub fn prepare_start_bat(mut path_to_save: PathBuf) -> Result<(), errors::MyErr> {
-    path_to_save.push("start.bat");
-    let mut file: File = File::create(path_to_save)?;
-    file.write_all(&reqwest::blocking::get(format!("https://raw.githubusercontent.com/mahdigholami099/VaLock/main/python/{}/start.bat", get_version()))?.bytes()?)?;
-    Ok(())
-}
-
 pub fn download_python(path_to_save: PathBuf) -> Result<(), errors::MyErr> {
     let archive = path_to_save.clone().join("py.zip");
     let mut file: File = File::create(&archive)?;
