@@ -156,14 +156,13 @@ fn set_active_profile(name: String) -> Result<(), errors::MyErr> {
 }
 
 #[tauri::command]
-fn start() {
-    // let mut start_path = get_data_dir();
-    // start_path.push("main.py");
+fn start() -> Result<(), errors::MyErr> {
+    let main_py = get_data_dir().join("main.py");
+    let python = get_data_dir().join("py").join("python.exe");
 
-    // let output  = Command::new("python").arg(start_path).spawn()
-    // .expect("Failed to open the application");
+    Command::new(python).arg(main_py).spawn()?;
 
-    // println!("Res: {:?}", output);
+    Ok(())
 }
 
 #[tauri::command]
@@ -192,7 +191,7 @@ async fn install_dependenies() -> Result<(), errors::MyErr> {
             return Err(errors::MyErr::CustomError(error.to_string()));
         }
     }
-    
+
     Ok(())
 }
 

@@ -51,14 +51,18 @@ const Home = (props) => {
 
   const onProfileSelect = (event) => {
     setActiveProfile(event.target.value);
-    invoke("set_active_profile", { name: profiles[event.target.value] })
-      .then()
-      .catch((error) => {
+    invoke("set_active_profile", { name: profiles[event.target.value] }).catch(
+      (error) => {
         alert(error);
-      });
+      }
+    );
   };
 
-  const onStart = () => {};
+  const onStart = () => {
+    invoke("start").catch((error) => {
+      alert(error);
+    });
+  };
 
   return (
     <Flex height="100vh" align="center" justify="center">
